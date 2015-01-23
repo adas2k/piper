@@ -30,7 +30,7 @@ V1Api.prototype.get = function(sId, cb) {
 };
 
 V1Api.prototype.removeRecord = function(key, cb) {
-  console.log('remove');
+  
   this.db.removeRecord(key, function(err, doesExist) {
     if(err)
       return cb(utils.createError(500, 'Db error'));
@@ -38,7 +38,6 @@ V1Api.prototype.removeRecord = function(key, cb) {
     if(!doesExist)
       return cb(utils.createError(404, 'Record not found'));
 
-    console.log('calling back with null');
     return cb(null);
   });
 };

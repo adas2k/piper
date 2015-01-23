@@ -85,7 +85,6 @@ RedisDB.prototype.removeRecord = function(key, cb) {
     if (!numRemoved)
       return cb(false, false);
 
-    console.log('done removing');
     return cb(false, true);
   });
 };

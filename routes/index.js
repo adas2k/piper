@@ -37,11 +37,11 @@ router.delete('/api/:version/data/:id', function(req, res) {
   console.log('X', req.params.id);
   var _api = checkAndSetApi(req.params.version, api, res);
   _api.removeRecord(req.params.id, function(err) {
-    if (err)
-      console.log('why here?');
+    console.log('cb called');
+    if (err) 
       return res.status(err.statusCode).json(err.errorObject);
-
-    return res.status(200);      
+    
+    return res.status(200).end();      
   });
 
 });
