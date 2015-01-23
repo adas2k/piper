@@ -12,8 +12,8 @@ API.get = function(key, cb) {
   API.api.get(key, cb);
 };
 
-API.remove = function(key, cb) {
-  API.api.remove(key, cb);
+API.removeRecord = function(key, cb) {
+  API.api.removeRecord(key, cb);
 };
 
 API.update = function(key, data, cb) {

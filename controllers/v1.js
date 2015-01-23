@@ -1,5 +1,6 @@
 var DB = require('../db/db_api.js');
 var RedisDb = require('../db/redis_db.js');
+var utils = require('../controllers/utils.js');
 
 function V1Api() {
   DB.setController(new RedisDb(null, null));
@@ -23,20 +24,21 @@ V1Api.prototype.get = function(sId, cb) {
       console.log('no data');
       return cb(utils.createError(404, 'Record not found'), null);
     }
-    console.log ('shit exists');
     return cb(null, JSON.parse(data));
 
   });
 };
 
-V1Api.prototype.remove = function(key, cb) {
-  this.db.remove(key, function(err, doesExist) {
+V1Api.prototype.removeRecord = function(key, cb) {
+  console.log('remove');
+  this.db.removeRecord(key, function(err, doesExist) {
     if(err)
       return cb(utils.createError(500, 'Db error'));
 
     if(!doesExist)
       return cb(utils.createError(404, 'Record not found'));
 
+    console.log('calling back with null');
     return cb(null);
   });
 };

@@ -20,27 +20,24 @@ RedisDB.prototype.create = function(data, cb) {
 };
 
 RedisDB.prototype.get = function(key, cb) {
+  var client = this.client;
   async.series([
     // checks key
     function(callback) {
-      console.log(this.client);
-      this.client.exists(key, function(err, doesExist){
-        console.log('cb');
+      client.exists(key, function(err, doesExist){
         // db error
         if(err)
           callback(err, null);
 
-        if (!doesExist) {
-          console.log('does not exist');
+        if (!doesExist) 
           callback(null, {doesExist: false});
-        }
 
         callback(null, null);
       });
     }, 
     // checks hash key
     function(callback) {
-      this.client.hexists(key, "data", function(err, doesExist) {
+      client.hexists(key, "data", function(err, doesExist) {
         // db error
         if(err)
           callback(err, null);
@@ -53,15 +50,14 @@ RedisDB.prototype.get = function(key, cb) {
     }, 
     // gets the actual data
     function(callback) {  
-      this.client.hget(key, "data", function(err, data) {
+      client.hget(key, "data", function(err, data) {
         if(err)
           callback(err, null);
 
         if (data == null || data == undefined)
           callback(null, {doesExist: false});
         
-        console.log(data);
-        callback(null, {doesExist: false, data: data});
+        callback(null, {doesExist: true, data: data});
       });
     }
   ], 
@@ -69,19 +65,27 @@ RedisDB.prototype.get = function(key, cb) {
   function(err, result) {
     // discards null entries
     console.log (result);
+    for(var i=0; i<result.length; i++) {
+      if(result[i] != null) {
+        if (!result[i].doesExist)
+          return cb(err, false, null);
 
-    return cb(err, doesExist, result[2]);
+        return cb(err, true, result[i].data);
+      }
+    }
   });
 };
 
-RedisDB.prototype.remove = function(key, cb) {
-  client.del(sId, function(err, numRemoved) {
+RedisDB.prototype.removeRecord = function(key, cb) {
+  this.client.del(key, function(err, numRemoved) {
+    console.log('hello');
     if(err)
       return cb(true, null);
 
     if (!numRemoved)
       return cb(false, false);
 
+    console.log('done removing');
     return cb(false, true);
   });
 };

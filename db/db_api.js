@@ -12,8 +12,8 @@ DB.get = function(key, cb) {
   DB.controller.get(key, cb);
 };
 
-DB.remove = function(key, cb) {
-  DB.controller.remove(key, cb);
+DB.removeRecord = function(key, cb) {
+  DB.controller.removeRecord(key, cb);
 };
 
 DB.update = function(key, data, cb) {
