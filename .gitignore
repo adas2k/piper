@@ -2,3 +2,4 @@ node_modules/
 *.rdb
 bin/
 .DS_Store
+npm-debug.log

@@ -1,0 +1,13 @@
+{
+  "name": "piper_engine_test",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "mocha": "*",
+    "should": "*", 
+    "assert": "*", 
+    "supertest": "*", 
+    "chai": "*", 
+    "supertest-chai":"0.0.8"
+  }
+}

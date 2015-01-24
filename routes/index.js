@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var api = require('../controllers/api.js');
 var _api = require('../controllers/v1.js');
+var utils = require('../controllers/utils.js');
 var V1Api = new _api();
 
 // supported API versions
@@ -9,11 +10,10 @@ var apiVersionMap = {
   "v1": V1Api,
 };
 
-router.post('/api/:version/data', function(req, res) {
+router.post('/api/:version/data', checkAndSetApi,   function(req, res) {
   // generate sId
   console.log('->' + req.body);
-  var _api = checkAndSetApi(req.params.version, api, res);
-  _api.create(req.body, function(err, data) {
+  api.create(req.body, function(err, data) {
     if(err)
       return res.status(err.statusCode).json(err.errorObject);
 
@@ -22,10 +22,9 @@ router.post('/api/:version/data', function(req, res) {
 });
 
 
-router.get('/api/:version/data/:id', function(req, res) {
+router.get('/api/:version/data/:id', checkAndSetApi, function(req, res) {
   console.log('<-', req.params.id);
-  var _api = checkAndSetApi(req.params.version, api, res);
-  _api.get(req.params.id, function(err, data) {
+  api.get(req.params.id, function(err, data) {
     if (err)
       return res.status(err.statusCode).json(err.errorObject);
 
@@ -33,11 +32,9 @@ router.get('/api/:version/data/:id', function(req, res) {
   });
 });
 
-router.delete('/api/:version/data/:id', function(req, res) {
+router.delete('/api/:version/data/:id', checkAndSetApi, function(req, res) {
   console.log('X', req.params.id);
-  var _api = checkAndSetApi(req.params.version, api, res);
-  _api.removeRecord(req.params.id, function(err) {
-    console.log('cb called');
+  api.removeRecord(req.params.id, function(err) {
     if (err) 
       return res.status(err.statusCode).json(err.errorObject);
     
@@ -46,14 +43,14 @@ router.delete('/api/:version/data/:id', function(req, res) {
 
 });
 
-
-checkAndSetApi = function(apiVersion, api, res) {
-  var _api = apiVersionMap[apiVersion];
-  if (_api == null)
+// middleware to check API version
+function checkAndSetApi(req, res, next) {
+  var _api = apiVersionMap[req.params.version];
+  if (_api == null) {
     return res.status(400).json({"status": "Bad Request", "message": "Unsupported API version"});
-
+  }
   api.setVersion(_api);
-  return api;
+  next();
 }
 
 module.exports = router;

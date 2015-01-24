@@ -16,21 +16,19 @@ V1Api.prototype.create = function(data, cb) {
   });
 };
 
-V1Api.prototype.get = function(sId, cb) {
-  this.db.get(sId, function (err, doesExist, data) {
+V1Api.prototype.get = function(key, cb) {
+  this.db.get(key, function (err, doesExist, data) {
     if(err)
       return cb(utils.createError(500, 'DB error'), null);
-    if (!doesExist) {
-      console.log('no data');
+    if (!doesExist) 
       return cb(utils.createError(404, 'Record not found'), null);
-    }
+    
     return cb(null, JSON.parse(data));
 
   });
 };
 
 V1Api.prototype.removeRecord = function(key, cb) {
-  
   this.db.removeRecord(key, function(err, doesExist) {
     if(err)
       return cb(utils.createError(500, 'Db error'));

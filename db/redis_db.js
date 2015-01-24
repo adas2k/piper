@@ -23,16 +23,16 @@ RedisDB.prototype.get = function(key, cb) {
   var client = this.client;
   async.series([
     // checks key
-    function(callback) {
+    function(callback) {  
       client.exists(key, function(err, doesExist){
         // db error
         if(err)
-          callback(err, null);
+          return callback(err, null);
 
         if (!doesExist) 
-          callback(null, {doesExist: false});
+          return callback(null, {doesExist: false});
 
-        callback(null, null);
+        return callback(null, null);
       });
     }, 
     // checks hash key
@@ -40,34 +40,33 @@ RedisDB.prototype.get = function(key, cb) {
       client.hexists(key, "data", function(err, doesExist) {
         // db error
         if(err)
-          callback(err, null);
+          return callback(err, null);
 
         if (!doesExist)
-          callback(null, {doesExist: false});
+          return callback(null, {doesExist: false});
 
-        callback(null, null);
+        return callback(null, null);
       });
     }, 
     // gets the actual data
-    function(callback) {  
+    function(callback) {    
       client.hget(key, "data", function(err, data) {
         if(err)
-          callback(err, null);
+          return callback(err, null);
 
         if (data == null || data == undefined)
-          callback(null, {doesExist: false});
+          return callback(null, {doesExist: false});
         
-        callback(null, {doesExist: true, data: data});
+        return callback(null, {doesExist: true, data: data});
       });
     }
   ], 
   // returns the result
   function(err, result) {
     // discards null entries
-    console.log (result);
     for(var i=0; i<result.length; i++) {
       if(result[i] != null) {
-        if (!result[i].doesExist)
+        if (!result[i].doesExist) 
           return cb(err, false, null);
 
         return cb(err, true, result[i].data);
