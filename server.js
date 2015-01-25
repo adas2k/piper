@@ -34,6 +34,7 @@ if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         console.log("Error: " + err);
+        return res.status(err.status).end();
     });
 }
 
@@ -42,6 +43,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     console.log("Error: " + err);
+    return res.status(err.status).end();
 });
 
 app.listen(port);
