@@ -1,14 +1,17 @@
 var DB = require('../db/db_api.js');
 var RedisDb = require('../db/redis_db.js');
 var utils = require('../controllers/utils.js');
+var DATA_SCHEMA_NAME = "DATA_SCHEMA";
 
 function V1Api() {
-  DB.setController(new RedisDb(null, null));
+  // use default port for now
+  DB.setController(RedisDb.getRedisDBClient(null, null));
   this.db = DB;
 }
 
 V1Api.prototype.create = function(data, cb) {
-  this.db.create(JSON.stringify(data), function(err, sId) {
+  var sId = utils.generateRandom();
+  this.db.create(DATA_SCHEMA_NAME, sId, JSON.stringify(data), function(err) {
     if(err)
       return cb(utils.createError(500, 'Db error'), null);
 
@@ -17,7 +20,7 @@ V1Api.prototype.create = function(data, cb) {
 };
 
 V1Api.prototype.get = function(key, cb) {
-  this.db.get(key, function (err, doesExist, data) {
+  this.db.get(DATA_SCHEMA_NAME, key, function (err, doesExist, data) {
     if(err)
       return cb(utils.createError(500, 'DB error'), null);
     if (!doesExist) 
@@ -29,7 +32,7 @@ V1Api.prototype.get = function(key, cb) {
 };
 
 V1Api.prototype.removeRecord = function(key, cb) {
-  this.db.removeRecord(key, function(err, doesExist) {
+  this.db.removeRecord(DATA_SCHEMA_NAME, key, function(err, doesExist) {
     if(err)
       return cb(utils.createError(500, 'Db error'));
 

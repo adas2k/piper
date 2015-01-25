@@ -2,8 +2,6 @@ var async = require('async');
 var redis = require('redis');
 var utils = require('../controllers/utils.js');
 
-var STORE_HASH_KEY = "data";
-
 function RedisDB(host, port) {
   this.client = redis.createClient();
   this.client.on("error", function(err) {
@@ -11,20 +9,19 @@ function RedisDB(host, port) {
   });
 }
 
-RedisDB.prototype.create = function(data, cb) {
-  var sId = utils.generateRandom();
-  this.client.hset(sId, STORE_HASH_KEY, data);
+RedisDB.prototype.create = function(schema, key, data, cb) {
+  this.client.hset(schema, key, data);
   if (cb == null || cb == undefined)
     return;
-  return cb(null, sId);
+  return cb(null);
 };
 
-RedisDB.prototype.get = function(key, cb) {
+RedisDB.prototype.get = function(schema, key, cb) {
   var client = this.client;
   async.series([
     // checks key
     function(callback) {  
-      client.exists(key, function(err, doesExist){
+      client.exists(schema, function(err, doesExist){
         // db error
         if(err)
           return callback(err, null);
@@ -37,7 +34,7 @@ RedisDB.prototype.get = function(key, cb) {
     }, 
     // checks hash key
     function(callback) {
-      client.hexists(key, "data", function(err, doesExist) {
+      client.hexists(schema, key, function(err, doesExist) {
         // db error
         if(err)
           return callback(err, null);
@@ -50,7 +47,7 @@ RedisDB.prototype.get = function(key, cb) {
     }, 
     // gets the actual data
     function(callback) {    
-      client.hget(key, "data", function(err, data) {
+      client.hget(schema, key, function(err, data) {
         if(err)
           return callback(err, null);
 
@@ -75,9 +72,8 @@ RedisDB.prototype.get = function(key, cb) {
   });
 };
 
-RedisDB.prototype.removeRecord = function(key, cb) {
-  this.client.del(key, function(err, numRemoved) {
-    console.log('hello');
+RedisDB.prototype.removeRecord = function(schema, key, cb) {
+  this.client.hdel(schema, key, function(err, numRemoved) {
     if(err)
       return cb(true, null);
 
@@ -87,5 +83,13 @@ RedisDB.prototype.removeRecord = function(key, cb) {
     return cb(false, true);
   });
 };
+var instance = null;
 
-module.exports = RedisDB;
+module.exports = {
+  
+  getRedisDBClient: function(host, port) {
+    if (instance == null)
+      instance = new RedisDB(host, port);
+    return instance;
+  }
+};

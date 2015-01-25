@@ -4,6 +4,15 @@ var request = require('supertest');
 var should = require('should'); 
 var supertestChai = require('supertest-chai');
 var unsupportedApiMessage = "Unsupported API version";
+var url = 'http://localhost:3000';
+var apiV1 = 'v1';
+var apiV0 = 'v0';
+var INVALID_CRED = "QWxhZGRpbjpvcGVuIHNlc2FtZQ==";
+// hip:ster
+var VALID_CRED = "aGlwOnN0ZXI=";
+var data = {
+  "test": 1234, 
+};
 var errStatusMap = {
   400: "Bad Request", 
   401: "Unauthorized",
@@ -14,13 +23,56 @@ var errStatusMap = {
 chai.should();
 chai.use(supertestChai.httpAsserts);
 
-describe('API Testing', function() {
-  var url = 'http://localhost:3000';
-  var apiV1 = 'v1';
-  var apiV0 = 'v0';
-  var data = {
-    "test": 1234, 
-  };
+describe('API Auth Testing', function() {
+  before(function(done) {
+    // TODO: Call bash script to create temp credentials
+    done();
+  });
+
+  describe('invalid credentials - all API calls', function() {
+    it('post - should return 401-Unauthorized', function(done) {
+      request(url)
+        .post('/api/' + apiV1 + '/data')
+        .set('Authorization', 'Basic ' + INVALID_CRED)
+        .send(data)
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(401);
+          res.body.status.should.equal(errStatusMap[401]);
+          done();
+        });
+    });
+
+    it('get - should return 401-Unauthorized', function(done) {
+      request(url)
+        .get('/api/' + apiV1 + '/data/123456')
+        .set('Authorization', 'Basic ' + INVALID_CRED)
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(401);
+          res.body.status.should.equal(errStatusMap[401]);
+          done();
+        });
+    });
+
+    it('delete - should return 401-Unauthorized', function(done) {
+      request(url)
+        .delete('/api/' + apiV1 + '/data/123456')
+        .set('Authorization', 'Basic ' + INVALID_CRED)
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(401);
+          res.body.status.should.equal(errStatusMap[401]);
+          done();
+        });
+    });
+  });
+});
+
+describe('API Data Tests', function() {
 
   before(function(done) {
     done();
@@ -31,6 +83,7 @@ describe('API Testing', function() {
     it('should return 201: Created', function(done) {
       request(url)  
         .post('/api/' + apiV1 + '/data')
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .send(data)
         .end(function (err, res) {
           if(err)
@@ -46,6 +99,7 @@ describe('API Testing', function() {
     after(function(done) {
       request(url)
         .delete('/api/' + apiV1 + '/data/' + _id)
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .end(function (err, res) {
           if (err)
             throw err;
@@ -62,6 +116,7 @@ describe('API Testing', function() {
     before(function(done) {
       request(url)  
         .post('/api/' + apiV1 + '/data')
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .send(data)
         .end(function (err, res) {
           if(err)
@@ -76,6 +131,7 @@ describe('API Testing', function() {
     it('should return 200: OK and JSON data: ' + JSON.stringify(data), function(done) {
       request(url)
         .get('/api/' + apiV1 + '/data/' + id)
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .end(function (err, res) {
           if (err)
             throw err; 
@@ -90,6 +146,7 @@ describe('API Testing', function() {
     after(function(done) {
       request(url)
         .delete('/api/' + apiV1 + '/data/' + id)
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .end(function (err, res) {
           if (err)
             throw err;
@@ -102,6 +159,7 @@ describe('API Testing', function() {
     it('should return 404: Not found', function(done) {
       request(url)
         .get('/api/' + apiV1 + '/data/123456')
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .end(function(err, res) {
           if (err)
             throw err;
@@ -117,6 +175,7 @@ describe('API Testing', function() {
     before(function(done) {
       request(url)  
         .post('/api/' + apiV1 + '/data')
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .send(data)
         .end(function (err, res) {
           if(err)
@@ -132,6 +191,7 @@ describe('API Testing', function() {
     it('should return 200: Ok', function(done) {
       request(url)
         .delete('/api/' + apiV1 + '/data/' + id)
+        .set('Authorization', 'Basic ' + VALID_CRED)
         .end(function(err, res) {
           if (err)
             throw err;
@@ -144,6 +204,7 @@ describe('API Testing', function() {
     after(function(done) {
      request(url)
       .get('/api/' + apiV1 + '/data/' + id)
+      .set('Authorization', 'Basic ' + VALID_CRED)
       .end(function(err, res) {
         if (err)
           throw err;
@@ -157,6 +218,7 @@ describe('API version test', function(done) {
   it('should return  status 400 - CRUD requests', function(done) {
     request(url)
       .post('/api/v0/data')
+      .set('Authorization', 'Basic ' + VALID_CRED)
       .send(data)
       .end(function (err, res) {
         if(err)
