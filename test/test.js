@@ -69,6 +69,41 @@ describe('API Auth Testing', function() {
           done();
         });
     });
+
+    it('post - should return 400', function(done) {
+      request(url)
+        .post('/api/' + apiV1 + '/data')
+        .send(data)
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(400);
+          done();
+        });
+    });
+
+    it('get - should return 400', function(done) {
+      request(url)
+        .get('/api/' + apiV1 + '/data/1234')
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(400);
+          done();
+        });
+    });
+
+    it('delete - should return 400', function(done) {
+      request(url)
+        .delete('/api/' + apiV1 + '/data/1234')
+        .end(function(err, res) {
+          if (err)
+            throw err;
+          res.should.have.status(400);
+          done();
+        });
+    });
+
   });
 });
 
