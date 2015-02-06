@@ -14,6 +14,12 @@ module.exports = {
       return sha.digest('hex');
   }, 
 
+  calculateHash: function(data) {
+    var sha = crypto.createHash('sha256');
+    sha.update(data+"");
+    return sha.digest('hex');
+  },
+
   createError: function(httpStatus, messageString) {
     var err = {};
     err.errorObject = {};

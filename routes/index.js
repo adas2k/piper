@@ -13,21 +13,64 @@ var apiVersionMap = {
   "v1": V1Api,
 };
 
-router.post('/api/:version/data', auth.authenticate, checkAndSetApi, function(req, res) {
+// Data Escrow API endpoints
+router.post('/api/:version/data', checkAndSetApi, function(req, res) {
   // generate sId
   console.log('->' + req.body);
-  api.create(req.body, function(err, data) {
+  api.createData(req.body, function(err, data) {
     if(err)
+      return res.status(err.statusCode).json(err.errorObject);
+
+    if ((data.eTag != null || data.eTag != undefined) && data.eTag.length > 0)
+      res.header('ETag', data.eTag);
+    return res.status(201).json(data.id);
+  });
+});
+
+
+router.get('/api/:version/data/:id', checkAndSetApi, function(req, res) {
+  console.log('<-', req.params.id);
+  var options = {};
+  options.eTag = req.headers['if-none-match'];
+  console.log(req.headers);
+  console.log('etag = ' + options.eTag);
+  api.getData(req.params.id, options, function(err, data) {
+    if (err)
+      return res.status(err.statusCode).json(err.errorObject);
+
+    if (!data.eTag && options.eTag)
+      return res.status(304).end();
+
+    if(data.eTag)
+      res.header('ETag', data.eTag)
+
+    return res.json(data.data);
+  });
+});
+
+router.delete('/api/:version/data/:id', auth.authenticate, checkAndSetApi, function(req, res) {
+  console.log('X', req.params.id);
+  api.removeData(req.params.id, function(err) {
+    if (err) 
+      return res.status(err.statusCode).json(err.errorObject);
+    
+    return res.status(200).end();      
+  });
+});
+
+// User Endpoints
+router.post('/api/:version/user', auth.authenticate, checkAndSetApi, function(req, res) {
+  api.createUser(req.body, function(err, data) {
+    if (err)
       return res.status(err.statusCode).json(err.errorObject);
 
     return res.status(201).json(data);
   });
 });
 
-
-router.get('/api/:version/data/:id', auth.authenticate, checkAndSetApi, function(req, res) {
+router.get('/api/:version/user/:id', auth.authenticate, checkAndSetApi, function(req, res) {
   console.log('<-', req.params.id);
-  api.get(req.params.id, function(err, data) {
+  api.getUser(req.params.id, function(err, data) {
     if (err)
       return res.status(err.statusCode).json(err.errorObject);
 
@@ -35,15 +78,14 @@ router.get('/api/:version/data/:id', auth.authenticate, checkAndSetApi, function
   });
 });
 
-router.delete('/api/:version/data/:id', auth.authenticate, checkAndSetApi, function(req, res) {
+router.delete('/api/:version/user/:id', auth.authenticate, checkAndSetApi, function(req, res) {
   console.log('X', req.params.id);
-  api.removeRecord(req.params.id, function(err) {
+  api.removeUser(req.params.id, function(err) {
     if (err) 
       return res.status(err.statusCode).json(err.errorObject);
     
     return res.status(200).end();      
   });
-
 });
 
 // middleware to check API version
