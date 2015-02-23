@@ -12,7 +12,7 @@ function V1Api() {
   this.createRequest = function(schemaName, data, cb) {
     var id = utils.generateRandom();
     var retData = {};
-    this.db.create(schemaName, id, data, function(err) {
+    this.db.create(schemaName, id, JSON.stringify(data), function(err) {
       if (err)
         return cb(utils.createError(500, 'Db error'), null);
 
@@ -59,7 +59,7 @@ function V1Api() {
 
 // Data escrow APIs
 V1Api.prototype.createData = function(data, cb) {
-  this.createRequest(DATA_SCHEMA_NAME, JSON.stringify(data), cb);
+  this.createRequest(DATA_SCHEMA_NAME, data, cb);
 };
 
 V1Api.prototype.getData = function(key, options, cb) {
@@ -73,7 +73,7 @@ V1Api.prototype.removeData = function(key, cb) {
 
 // User APIs
 V1Api.prototype.createUser = function(userData, cb) {
-  this.createRequest(USER_SCHEMA_NAME, JSON.stringify(userData), cb);
+  this.createRequest(USER_SCHEMA_NAME, data, cb);
 };
 
 V1Api.prototype.getUser = function(userId, cb) {
